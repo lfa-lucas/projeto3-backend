@@ -1,0 +1,30 @@
+{
+  "name": "projeto3-backend",
+  "version": "1.0.0",
+  "description": "server-side do projeto 3",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lfa-lucas/projeto3-backend.git"
+  },
+  "keywords": [],
+  "author": "lucas-yuri",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lfa-lucas/projeto3-backend/issues"
+  },
+  "homepage": "https://github.com/lfa-lucas/projeto3-backend#readme",
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-jwt": "^7.7.7",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.8.0"
+  }
+}

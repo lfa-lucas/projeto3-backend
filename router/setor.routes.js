@@ -156,6 +156,14 @@ router.delete(
       const deleteSetor = await SetorModel.findByIdAndDelete(id);
       await AtividadeModel.deleteMany({ setor: id });
       await DeducaoModel.deleteMany({ setor: id });
+      //passar um setor vazio na model de cada usuário do setor deletado
+      deleteSetor.usuarios.forEach(async (element) => {
+        await UserModel.findByIdAndUpdate(
+          element,
+          { setor: null },
+          { new: true, runValidators: true }
+        );
+      });
       return response.status(200).json(deleteSetor);
     } catch (error) {
       console.log(error);

@@ -13,7 +13,7 @@ const userRoute = express.Router();
 
 const saltRounds = 10;
 
-const status500 = res.status(500).json({ msg: "Algo deu errado..." });
+// const status500 = res.status(500).json({ msg: "Algo deu errado..." });
 
 // registrar novo usuário
 userRoute.post("/register", async (req, res) => {
@@ -29,15 +29,15 @@ userRoute.post("/register", async (req, res) => {
 
     const newUser = await UserModel.create({
       ...req.body,
-      password: hashPassword,
+      passwordHash: hashPassword,
     });
 
-    delete newUser._doc.password;
+    delete newUser._doc.passwordHash;
 
     return res.status(201).json(newUser);
   } catch (error) {
     console.log(error);
-    return status500;
+    return res.status(500).json({ msg: "Algo deu errado..." });
   }
 });
 
@@ -65,7 +65,7 @@ userRoute.post("/login", async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return status500;
+    return res.status(500).json({ msg: "Algo deu errado..." });
   }
 });
 
@@ -82,11 +82,29 @@ userRoute.get(
       return res.status(200).json(users);
     } catch (error) {
       console.log(error);
-      return status500;
+      return res.status(500).json({ msg: "Algo deu errado..." });
     }
   }
 );
 
+// consultar o próprio perfil - busca o Id do usuário logado
+// criei essa rota para diferenciar da consulta de ALGUM usuário
+// verificar a funcionalidade isLoggedUser
+userRoute.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
+  try {
+    const loggedUser = req.currentUser._id;
+    const userProfile = await UserModel.findById(loggedUser)
+      .populate("setor")
+      .populate("tarefas");
+
+    delete userProfile._doc.passwordHash;
+
+    return res.status(200).json(userProfile);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Algo deu errado..." });
+  }
+});
 // Consultar UM usuário
 userRoute.get("/:id", isAuth, isGestor, attachCurrentUser, async (req, res) => {
   try {
@@ -105,30 +123,25 @@ userRoute.get("/:id", isAuth, isGestor, attachCurrentUser, async (req, res) => {
     return res.status(200).json(user);
   } catch (error) {
     console.log(error);
-    return status500;
+    return res.status(500).json({ msg: "Algo deu errado..." });
   }
 });
 
-// consultar o próprio perfil - busca o Id do usuário logado
-// criei essa rota para diferenciar da consulta de ALGUM usuário
-// verificar a funcionalidade isLoggedUser
-userRoute.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
+// Editar o PRÓPRIO perfil de usuário
+userRoute.put("/editprofile", isAuth, attachCurrentUser, async (req, res) => {
   try {
-    const loggedUser = req.currentUser._id;
-
-    const userProfile = await UserModel.findById(loggedUser)
-      .populate("setor")
-      .populate("tarefas");
-
-    delete user._doc.passwordHash;
-
-    return res.status(200).json(userProfile);
+    const updateProfile = await UserModel.findByIdAndUpdate(
+      req.currentUser._id,
+      { ...req.body },
+      { new: true, runValidators: true }
+    );
+    delete updateProfile._doc.passwordHash;
+    return res.status(200).json(updateProfile);
   } catch (error) {
     console.log(error);
-    return status500;
+    return res.status(500).json({ msg: "Algo deu errado..." });
   }
 });
-
 // Editar perfil de ALGUM usuário
 userRoute.put(
   "/edit/:id",
@@ -143,30 +156,14 @@ userRoute.put(
         { ...req.body },
         { new: true, runValidators: true }
       );
-
+      delete updateUser._doc.passwordHash;
       return res.status(200).json(updateUser);
     } catch (error) {
       console.log(error);
-      return status500;
+      return res.status(500).json({ msg: "Algo deu errado..." });
     }
   }
 );
-
-// Editar o PRÓPRIO perfil de usuário
-userRoute.put("/editprofile/", isAuth, attachCurrentUser, async (req, res) => {
-  try {
-    const updateProfile = await UserModel.findByIdAndUpdate(
-      req.currentUser._id,
-      { ...req.body },
-      { new: true, runValidators: true }
-    );
-
-    return res.status(200).json(updateProfile);
-  } catch (error) {
-    console.log(error);
-    return status500;
-  }
-});
 
 // Deletar ALGUM usuário
 userRoute.delete(
@@ -184,20 +181,20 @@ userRoute.delete(
         return res.status(400).json({ msg: "Usuário não encontrado!" });
       }
 
-      await TarefaModel.deleteMany({ user: id });
+      await TarefaModel.deleteMany({ deletedUser: id });
 
       await SetorModel.findByIdAndUpdate(
-        deleteUsuario.setor,
+        deletedUser.setor,
         {
-          $pull: { usuarios: deleteUsuario._id },
+          $pull: { usuarios: deletedUser._id },
         },
         { runValidators: true }
       );
-
+      delete deletedUser._doc.passwordHash;
       return res.status(200).json(deletedUser);
     } catch (error) {
       console.log(error);
-      return status500;
+      return res.status(500).json({ msg: "Algo deu errado..." });
     }
   }
 );

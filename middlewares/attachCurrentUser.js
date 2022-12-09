@@ -1,4 +1,4 @@
-import UserModel from "../models/user.model.js";
+import UserModel from "../model/user.model.js";
 
 async function attachCurrentUser(req, res, next) {
   try {

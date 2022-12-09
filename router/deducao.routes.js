@@ -71,7 +71,7 @@ router.get(
 router.post(
   "/create/:idSetor",
   isAuth,
-  isGestor,
+  isAdmin,
   attachCurrentUser,
   async (request, response) => {
     try {
@@ -80,11 +80,11 @@ router.post(
       if (!loggedUser) {
         return response.status(404).json({ msg: "Usuário não encontrado!" });
       }
-      if (loggedUser.role === "gestor" && loggedUser.setor !== idSetor) {
-        return response.status(401).json({
-          msg: "Setor da requisição difere do setor do gestor logado!",
-        });
-      }
+      // if (loggedUser.role === "gestor" && loggedUser.setor !== idSetor) {
+      //   return response.status(401).json({
+      //     msg: "Setor da requisição difere do setor do gestor logado!",
+      //   });
+      // }
       const newDeducao = await DeducaoModel.create({
         ...request.body,
         setor: idSetor,

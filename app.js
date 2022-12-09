@@ -2,11 +2,11 @@ import express from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import connect from "./config/db.config.js";
-import userRoute from "./routes/user.routes.js";
-import atividadeRoute from "./routes/atividade.routes.js";
-import setorRoute from "./routes/setor.routes.js";
-import deducaoRoute from "./routes/deducao.routes.js";
-import tarefaRoute from "./routes/tarefa.routes.js";
+import userRoute from "./router/user.routes.js";
+import atividadeRoute from "./router/atividade.routes.js";
+import setorRoute from "./router/setor.routes.js";
+import deducaoRoute from "./router/deducao.routes.js";
+import tarefaRoute from "./router/tarefa.routes.js";
 
 dotenv.config();
 

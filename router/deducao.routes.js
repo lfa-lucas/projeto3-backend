@@ -118,7 +118,7 @@ router.put(
           .json({ msg: "Dedução não foi encontrada!" });
       }
       if (
-        loggedUser.setor.valueOf() !== deducao.setor.valueof() &&
+        loggedUser.setor.valueOf() !== deducao.setor.valueOf() &&
         loggedUser.role !== "admin"
       ) {
         return response.status(403).json({

@@ -122,6 +122,15 @@ router.put(
       if (!setor) {
         return response.status(404).json({ msg: "Setor não encontrado!" });
       }
+      if (user.setor) {
+        await SetorModel.findByIdAndUpdate(
+          user.setor.valueOf(),
+          {
+            $pull: { usuarios: user._id },
+          },
+          { new: true, runValidators: true }
+        );
+      }
       const user = await UserModel.findByIdAndUpdate(
         idUser,
         { setor: idSetor },

@@ -16,9 +16,7 @@ router.get(
   async (request, response) => {
     try {
       const loggedUser = request.currentUser;
-      if (!loggedUser) {
-        return response.status(404).json({ msg: "Usuário não encontrado!" });
-      }
+
       let data = [];
       if (loggedUser.role === "gestor") {
         data = await DeducaoModel.find({
@@ -43,22 +41,19 @@ router.get(
     try {
       const { id } = request.params;
       const loggedUser = request.currentUser;
-      if (!loggedUser) {
-        return response.status(404).json({ msg: "Usuário não encontrado!" });
-      }
 
       const deducao = await DeducaoModel.findById(id).populate("setor");
 
+      if (!deducao) {
+        return response.status(404).json("Dedução não foi encontrada!");
+      }
       if (
-        loggedUser.setor !== deducao.setor._id &&
+        loggedUser.setor.valueOf() !== deducao.setor._id.valueOf() &&
         loggedUser.role !== "admin"
       ) {
         return response
           .status(401)
           .json({ msg: "Dedução não pertence ao setor do usuário logado!" });
-      }
-      if (!deducao) {
-        return response.status(404).json("Dedução não foi encontrada!");
       }
       return response.status(200).json(deducao);
     } catch (error) {
@@ -71,20 +66,21 @@ router.get(
 router.post(
   "/create/:idSetor",
   isAuth,
-  isAdmin,
+  isGestor,
   attachCurrentUser,
   async (request, response) => {
     try {
       const { idSetor } = request.params;
       const loggedUser = request.currentUser;
-      if (!loggedUser) {
-        return response.status(404).json({ msg: "Usuário não encontrado!" });
+
+      if (
+        loggedUser.role === "gestor" &&
+        loggedUser.setor.valueOf() !== idSetor
+      ) {
+        return response.status(403).json({
+          msg: "Setor da requisição difere do setor do gestor logado!",
+        });
       }
-      // if (loggedUser.role === "gestor" && loggedUser.setor !== idSetor) {
-      //   return response.status(401).json({
-      //     msg: "Setor da requisição difere do setor do gestor logado!",
-      //   });
-      // }
       const newDeducao = await DeducaoModel.create({
         ...request.body,
         setor: idSetor,
@@ -114,12 +110,18 @@ router.put(
     try {
       const { id } = request.params;
       const loggedUser = request.currentUser;
-      if (!loggedUser) {
-        return response.status(404).json({ msg: "Usuário não encontrado!" });
-      }
+
       const deducao = await DeducaoModel.findById(id);
-      if (loggedUser.setor !== deducao.setor && loggedUser.role !== "admin") {
-        return response.status(401).json({
+      if (!deducao) {
+        return response
+          .status(404)
+          .json({ msg: "Dedução não foi encontrada!" });
+      }
+      if (
+        loggedUser.setor.valueOf() !== deducao.setor.valueof() &&
+        loggedUser.role !== "admin"
+      ) {
+        return response.status(403).json({
           msg: "Setor da requisição difere do setor do usuário logado!",
         });
       }
@@ -145,11 +147,18 @@ router.delete(
     try {
       const { id } = request.params;
       const loggedUser = request.currentUser;
-      if (!loggedUser) {
-        return response.status(404).json({ msg: "Usuário não encontrado!" });
-      }
+
       const deducao = await DeducaoModel.findById(id);
-      if (loggedUser.setor !== deducao.setor && loggedUser.role !== "admin") {
+      if (!deducao) {
+        return response
+          .status(404)
+          .json({ msg: "Dedução não foi encontrada!" });
+      }
+
+      if (
+        loggedUser.setor.valueOf() !== deducao.setor.valueOf() &&
+        loggedUser.role !== "admin"
+      ) {
         return response.status(401).json({
           msg: "Setor da requisição difere do setor do usuário logado!",
         });

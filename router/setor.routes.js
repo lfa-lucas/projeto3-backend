@@ -112,12 +112,16 @@ router.put(
 router.put(
   "/insertUser/:idUser/:idSetor",
   isAuth,
-  isGestor,
+  isAdmin,
   attachCurrentUser,
   async (request, response) => {
     try {
       const { idUser, idSetor } = request.params;
-
+      const loggedUser = request.currentUser;
+      const setor = await SetorModel.findById(idSetor);
+      if (!setor) {
+        return response.status(404).json({ msg: "Setor não encontrado!" });
+      }
       const user = await UserModel.findByIdAndUpdate(
         idUser,
         { setor: idSetor },
@@ -127,13 +131,15 @@ router.put(
       if (!user) {
         return response.status(404).json({ msg: "Usuário não encontrado!" });
       }
-      await SetorModel.findByIdAndUpdate(
-        idSetor,
-        {
-          $push: { usuarios: user._id },
-        },
-        { new: true, runValidators: true }
-      );
+      if (!setor.usuarios.includes(idUser)) {
+        await SetorModel.findByIdAndUpdate(
+          idSetor,
+          {
+            $push: { usuarios: user._id },
+          },
+          { new: true, runValidators: true }
+        );
+      }
 
       return response
         .status(200)

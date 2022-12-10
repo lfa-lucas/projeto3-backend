@@ -14,7 +14,7 @@ const setorSchema = new Schema(
     usuarios: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Usuario",
+        ref: "User",
       },
     ],
     chefe: {

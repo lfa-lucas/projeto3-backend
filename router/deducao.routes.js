@@ -8,30 +8,24 @@ import isGestor from "../middlewares/isGestor.js";
 import isAuth from "../middlewares/isAuth.js";
 const router = express.Router();
 
-router.get(
-  "/",
-  isAuth,
-  isGestor,
-  attachCurrentUser,
-  async (request, response) => {
-    try {
-      const loggedUser = request.currentUser;
+router.get("/", isAuth, attachCurrentUser, async (request, response) => {
+  try {
+    const loggedUser = request.currentUser;
 
-      let data = [];
-      if (loggedUser.role === "gestor") {
-        data = await DeducaoModel.find({
-          setor: loggedUser.setor,
-        }).populate("setor");
-      } else {
-        data = await DeducaoModel.find().populate("setor");
-      }
-      return response.status(200).json(data);
-    } catch (error) {
-      console.log(error);
-      return response.status(500).json({ msg: "Erro interno no servidor!" });
+    let data = [];
+    if (loggedUser.role === "gestor" || loggedUser.role === "usuario") {
+      data = await DeducaoModel.find({
+        setor: loggedUser.setor,
+      }).populate("setor");
+    } else {
+      data = await DeducaoModel.find().populate("setor");
     }
+    return response.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    return response.status(500).json({ msg: "Erro interno no servidor!" });
   }
-);
+});
 router.get(
   "/:id",
   isAuth,

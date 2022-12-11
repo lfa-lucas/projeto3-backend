@@ -106,30 +106,42 @@ userRoute.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
   }
 });
 // Consultar UM usuário
-userRoute.get("/:id", isAuth, isGestor, attachCurrentUser, async (req, res) => {
-  try {
-    const { id } = req.params;
+userRoute.get(
+  "/one-user/:id",
+  isAuth,
+  isGestor,
+  attachCurrentUser,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    const user = await UserModel.findById(id)
-      .populate("setor")
-      .populate("tarefas");
+      const user = await UserModel.findById(id)
+        .populate("setor")
+        .populate("tarefas");
 
-    if (!user) {
-      return res.status(404).json({ msg: "Usuário não encontrado!" });
+      if (!user) {
+        return res.status(404).json({ msg: "Usuário não encontrado!" });
+      }
+
+      delete user._doc.passwordHash;
+
+      return res.status(200).json(user);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ msg: "Algo deu errado..." });
     }
-
-    delete user._doc.passwordHash;
-
-    return res.status(200).json(user);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ msg: "Algo deu errado..." });
   }
-});
+);
 
 // Editar o PRÓPRIO perfil de usuário
 userRoute.put("/editprofile", isAuth, attachCurrentUser, async (req, res) => {
   try {
+    if (req.currentUser.role !== "admin") {
+      delete req.body.name;
+      delete req.body.active;
+      delete req.body.role;
+    }
+
     const updateProfile = await UserModel.findByIdAndUpdate(
       req.currentUser._id,
       { ...req.body },

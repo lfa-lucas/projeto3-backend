@@ -19,11 +19,11 @@ const setorSchema = new Schema(
     ],
     chefe: {
       type: Schema.Types.ObjectId,
-      ref: "Usuario",
+      ref: "User",
     },
     substituto: {
       type: Schema.Types.ObjectId,
-      ref: "Usuario",
+      ref: "User",
     },
     atividades: [
       {

@@ -23,9 +23,9 @@ router.get(
       }
 
       const data = await SetorModel.find()
-        .populate("usuarios")
-        .populate("chefe")
-        .populate("substituto")
+        .populate("usuarios", "-passwordHash")
+        .populate("chefe", "-passwordHash")
+        .populate("substituto", "-passwordHash")
         .populate("atividades")
         .populate("deducoes");
       return response.status(200).json(data);
@@ -57,9 +57,9 @@ router.get(
           .json({ msg: "Setor não pertence ao usuário logado!" });
       }
       const setor = await SetorModel.findById(id)
-        .populate("usuarios")
-        .populate("chefe")
-        .populate("substituto")
+        .populate("usuarios", "-passwordHash")
+        .populate("chefe", "-passwordHash")
+        .populate("substituto", "-passwordHash")
         .populate("atividades")
         .populate("deducoes");
       if (!setor) {

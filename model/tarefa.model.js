@@ -8,7 +8,7 @@ const tarefaSchema = new Schema(
     },
     usuario: {
       type: Schema.Types.ObjectId,
-      ref: "Usuario",
+      ref: "User",
     },
     atividade: {
       type: Schema.Types.ObjectId,
@@ -23,13 +23,14 @@ const tarefaSchema = new Schema(
     },
     concluida: {
       type: Boolean,
+      default: false,
     },
     observacao: {
       type: String,
     },
     validada: {
       type: Boolean,
-      required: true,
+      default: false,
     },
   },
   {

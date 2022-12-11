@@ -117,11 +117,18 @@ router.put(
   async (request, response) => {
     try {
       const { idUser, idSetor } = request.params;
+      console.log();
       const loggedUser = request.currentUser;
       const setor = await SetorModel.findById(idSetor);
       if (!setor) {
         return response.status(404).json({ msg: "Setor não encontrado!" });
       }
+
+      const user = await UserModel.findById(idUser);
+      if (!user) {
+        return response.status(404).json({ msg: "Usuário não encontrado!" });
+      }
+
       if (user.setor) {
         await SetorModel.findByIdAndUpdate(
           user.setor.valueOf(),
@@ -131,15 +138,13 @@ router.put(
           { new: true, runValidators: true }
         );
       }
-      const user = await UserModel.findByIdAndUpdate(
+
+      await UserModel.findByIdAndUpdate(
         idUser,
         { setor: idSetor },
         { new: true, runValidators: true }
       );
 
-      if (!user) {
-        return response.status(404).json({ msg: "Usuário não encontrado!" });
-      }
       if (!setor.usuarios.includes(idUser)) {
         await SetorModel.findByIdAndUpdate(
           idSetor,

@@ -1,4 +1,5 @@
 import express from "express";
+import UserModel from "../model/user.model.js";
 import TarefaModel from "../model/tarefa.model.js";
 import AtividadeModel from "../model/atividade.model.js";
 import DeducaoModel from "../model/deducao.model.js";
@@ -6,11 +7,29 @@ import SetorModel from "../model/setor.model.js";
 import attachCurrentUser from "../middlewares/attachCurrentUser.js";
 import isAdmin from "../middlewares/isAdmin.js";
 import isAuth from "../middlewares/isAuth.js";
-import UserModel from "../model/user.model.js";
 
 const router = express.Router();
 
-router.get("/", isAuth, attachCurrentUser, async (request, response) => {
+router.get(
+  "/all",
+  isAuth,
+  isAdmin,
+  attachCurrentUser,
+  async (request, response) => {
+    try {
+      const data = await TarefaModel.find()
+        .populate("usuario")
+        .populate("atividade")
+        .populate("deducao");
+      return response.status(200).json(data);
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({ msg: "Erro interno no servidor!" });
+    }
+  }
+);
+
+router.get("/lista", isAuth, attachCurrentUser, async (request, response) => {
   try {
     const loggedUser = request.currentUser;
     if (!loggedUser) {
@@ -27,31 +46,36 @@ router.get("/", isAuth, attachCurrentUser, async (request, response) => {
     return response.status(500).json({ msg: "Erro interno no servidor!" });
   }
 });
-router.get("/:id", isAuth, attachCurrentUser, async (request, response) => {
-  try {
-    const loggedUser = request.currentUser;
-    if (!loggedUser) {
-      return response.status(404).json({ msg: "Usuário não encontrado!" });
+router.get(
+  "/detalha/:id",
+  isAuth,
+  attachCurrentUser,
+  async (request, response) => {
+    try {
+      const loggedUser = request.currentUser;
+      if (!loggedUser) {
+        return response.status(404).json({ msg: "Usuário não encontrado!" });
+      }
+      const { id } = request.params;
+      if (!loggedUser.tarefas.includes(id)) {
+        return response
+          .status(401)
+          .json({ msg: "Tarefa não pertence ao usuário logado!" });
+      }
+      const tarefa = await TarefaModel.findById(id)
+        .populate("usuario")
+        .populate("atividade")
+        .populate("deducao");
+      if (!tarefa) {
+        return response.status(404).json("Tarefa não foi encontrada!");
+      }
+      return response.status(200).json(tarefa);
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({ msg: "Erro interno no servidor!" });
     }
-    const { id } = request.params;
-    if (!loggedUser.tarefas.includes(id)) {
-      return response
-        .status(401)
-        .json({ msg: "Tarefa não pertence ao usuário logado!" });
-    }
-    const tarefa = await TarefaModel.findById(id)
-      .populate("usuario")
-      .populate("atividade")
-      .populate("deducao");
-    if (!tarefa) {
-      return response.status(404).json("Tarefa não foi encontrada!");
-    }
-    return response.status(200).json(tarefa);
-  } catch (error) {
-    console.log(error);
-    return response.status(500).json({ msg: "Erro interno no servidor!" });
   }
-});
+);
 
 router.post("/create", isAuth, attachCurrentUser, async (request, response) => {
   try {

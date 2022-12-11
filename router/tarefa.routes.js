@@ -19,7 +19,7 @@ router.get(
   async (request, response) => {
     try {
       const data = await TarefaModel.find()
-        .populate("usuario")
+        .populate("usuario", "-passwordHash")
         .populate("atividade")
         .populate("deducao")
         .populate("setor");
@@ -44,7 +44,7 @@ router.get(
       }
       console.log(loggedUser);
       const data = await TarefaModel.find({ setor: loggedUser.setor })
-        .populate("usuario")
+        .populate("usuario", "-passwordHash")
         .populate("atividade")
         .populate("deducao")
         .populate("setor");
@@ -64,7 +64,7 @@ router.get("/lista", isAuth, attachCurrentUser, async (request, response) => {
     }
     console.log(loggedUser);
     const data = await TarefaModel.find({ usuario: loggedUser._id })
-      .populate("usuario")
+      .populate("usuario", "-passwordHash")
       .populate("atividade")
       .populate("deducao")
       .populate("setor");
@@ -96,7 +96,7 @@ router.get(
           .json({ msg: "Tarefa não pertence ao usuário logado!" });
       }
       const tarefa = await TarefaModel.findById(id)
-        .populate("usuario")
+        .populate("usuario", "-passwordHash")
         .populate("atividade")
         .populate("deducao")
         .populate("setor");

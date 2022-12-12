@@ -32,7 +32,7 @@ userRoute.post("/register", async (req, res) => {
       delete req.body.setor;
     }
     const user = await UserModel.find({ email: email });
-    console.log(user);
+
     if (user.length !== 0) {
       return res.status(400).json({ msg: "Email já cadastrado" });
     }
@@ -58,7 +58,7 @@ userRoute.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await UserModel.findOne({ email: email });
+    const user = await UserModel.findOne({ email: email }).populate("setor");
     if (!email) {
       return res.status(400).json({ msg: "Email não preenchido" });
     }
@@ -159,7 +159,13 @@ userRoute.put("/editprofile", isAuth, attachCurrentUser, async (req, res) => {
       delete req.body.active;
       delete req.body.role;
     }
-
+    if (!req.body.email) {
+      return res.status(400).json({ msg: "Email não informado!" });
+    }
+    const user = await UserModel.find({ email: req.body.email });
+    if (user.length !== 0) {
+      return res.status(400).json({ msg: "Email já cadastrado" });
+    }
     const updateProfile = await UserModel.findByIdAndUpdate(
       req.currentUser._id,
       { ...req.body },

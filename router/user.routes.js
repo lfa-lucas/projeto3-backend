@@ -18,12 +18,24 @@ const saltRounds = 10;
 // registrar novo usuário
 userRoute.post("/register", async (req, res) => {
   try {
-    const { password } = req.body;
-
+    const { password, name, email, setor } = req.body;
+    if (!name) {
+      return res.status(400).json({ msg: "Nome não foi inserido." });
+    }
+    if (!email) {
+      return res.status(400).json({ msg: "Email não foi inserido." });
+    }
     if (!password) {
       return res.status(400).json({ msg: "Senha não foi inserida." });
     }
-
+    if (!setor) {
+      delete req.body.setor;
+    }
+    const user = await UserModel.find({ email: email });
+    console.log(user);
+    if (user.length !== 0) {
+      return res.status(400).json({ msg: "Email já cadastrado" });
+    }
     const saltString = await bcrypt.genSalt(saltRounds);
     const hashPassword = await bcrypt.hash(password, saltString);
 
@@ -47,6 +59,12 @@ userRoute.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     const user = await UserModel.findOne({ email: email });
+    if (!email) {
+      return res.status(400).json({ msg: "Email não preenchido" });
+    }
+    if (!password) {
+      return res.status(400).json({ msg: "Senha não preenchida" });
+    }
 
     if (!user) {
       return res.status(400).json({ msg: "E-mail/senha inválido." });

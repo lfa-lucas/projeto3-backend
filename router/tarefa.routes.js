@@ -74,6 +74,28 @@ router.get("/lista", isAuth, attachCurrentUser, async (request, response) => {
     return response.status(500).json({ msg: "Erro interno no servidor!" });
   }
 });
+
+router.get(
+  "/usuario/:idUser",
+  isAuth,
+  isGestor,
+  attachCurrentUser,
+  async (request, response) => {
+    try {
+      const { idUser } = request.params;
+      const data = await TarefaModel.find({ usuario: idUser })
+        .populate("usuario", "-passwordHash")
+        .populate("atividade")
+        .populate("deducao")
+        .populate("setor");
+      return response.status(200).json(data);
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({ msg: "Erro interno no servidor!" });
+    }
+  }
+);
+
 router.get(
   "/detalha/:id",
   isAuth,

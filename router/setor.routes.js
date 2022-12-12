@@ -35,6 +35,16 @@ router.get(
     }
   }
 );
+router.get("/registroPage", async (request, response) => {
+  try {
+    const data = await SetorModel.find({}, { _id: 1, nome: 1, sigla: 1 });
+
+    return response.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    return response.status(500).json({ msg: "Erro interno no servidor!" });
+  }
+});
 router.get(
   "/:id",
   isAuth,

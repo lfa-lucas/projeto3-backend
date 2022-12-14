@@ -119,6 +119,36 @@ router.put(
     }
   }
 );
+
+router.put("/registerUser/:idUser/:idSetor", async (request, response) => {
+  try {
+    const { idUser, idSetor } = request.params;
+
+    const setor = await SetorModel.findById(idSetor);
+    if (!setor) {
+      return response.status(404).json({ msg: "Setor não encontrado!" });
+    }
+
+    const user = await UserModel.findById(idUser);
+    if (!user) {
+      return response.status(404).json({ msg: "Usuário não encontrado!" });
+    }
+
+    await SetorModel.findByIdAndUpdate(
+      idSetor,
+      {
+        $push: { usuarios: user._id },
+      },
+      { new: true, runValidators: true }
+    );
+
+    return response.status(200).json({ msg: "Usuário inserido com sucesso!" });
+  } catch (error) {
+    console.log(error);
+    return response.status(500).json({ msg: "Erro interno no servidor!" });
+  }
+});
+
 router.put(
   "/insertUser/:idUser/:idSetor",
   isAuth,

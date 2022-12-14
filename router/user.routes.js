@@ -95,7 +95,9 @@ userRoute.get(
   attachCurrentUser,
   async (req, res) => {
     try {
-      const users = await UserModel.find({}, { passwordHash: 0 });
+      const users = await UserModel.find({}, { passwordHash: 0 }).populate(
+        "setor"
+      );
 
       return res.status(200).json(users);
     } catch (error) {

@@ -67,7 +67,14 @@ router.get(
           .json({ msg: "Setor não pertence ao usuário logado!" });
       }
       const setor = await SetorModel.findById(id)
-        .populate("usuarios", "-passwordHash")
+        .populate({
+          path: "usuarios",
+          select: "-passwordHash",
+          populate: {
+            path: "tarefas",
+            model: "Tarefa",
+          },
+        })
         .populate("chefe", "-passwordHash")
         .populate("substituto", "-passwordHash")
         .populate("atividades")

@@ -176,6 +176,12 @@ router.put(
         return response.status(404).json({ msg: "Usuário não encontrado!" });
       }
 
+      if (idSetor === user.setor.valueOf()) {
+        return response
+          .status(200)
+          .json({ msg: "Usuário inserido com sucesso!" });
+      }
+
       if (user.setor) {
         await SetorModel.findByIdAndUpdate(
           user.setor.valueOf(),

@@ -137,8 +137,13 @@ userRoute.get(
 
       const user = await UserModel.findById(id)
         .populate("setor")
-        .populate("tarefas");
-
+        .populate({
+          path: "tarefas",
+          populate: [
+            { path: "atividade", model: "Atividade" },
+            { path: "deducao", model: "Deducao" },
+          ],
+        });
       if (!user) {
         return res.status(404).json({ msg: "Usuário não encontrado!" });
       }

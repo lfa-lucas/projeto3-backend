@@ -3,7 +3,6 @@ import UserModel from "../model/user.model.js";
 async function attachCurrentUser(req, res, next) {
   try {
     const loggedUser = req.auth;
-    console.log("req.auth is: " + req.auth);
 
     const user = await UserModel.findOne(
       { _id: loggedUser._id },

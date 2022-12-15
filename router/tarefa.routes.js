@@ -62,7 +62,6 @@ router.get("/lista", isAuth, attachCurrentUser, async (request, response) => {
     if (!loggedUser) {
       return response.status(404).json({ msg: "Usuário não encontrado!" });
     }
-    console.log(loggedUser);
     const data = await TarefaModel.find({ usuario: loggedUser._id })
       .populate("usuario", "-passwordHash")
       .populate("atividade")
@@ -154,7 +153,7 @@ router.post("/create", isAuth, attachCurrentUser, async (request, response) => {
     const newTarefa = await TarefaModel.create({
       ...request.body,
       usuario: loggedUser._id,
-      setor: loggedUser.setor,
+      setor: loggedUser.setor.valueOf(),
     });
     await UserModel.findByIdAndUpdate(
       loggedUser._id,

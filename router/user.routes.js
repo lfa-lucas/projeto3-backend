@@ -217,14 +217,12 @@ userRoute.delete(
   async (req, res) => {
     try {
       const { id } = req.params;
-
       const deletedUser = await UserModel.findByIdAndDelete(id);
-
       if (!deletedUser) {
         return res.status(400).json({ msg: "Usuário não encontrado!" });
       }
 
-      await TarefaModel.deleteMany({ deletedUser: id });
+      await TarefaModel.deleteMany({ usuario: id });
 
       await SetorModel.findByIdAndUpdate(
         deletedUser.setor,
